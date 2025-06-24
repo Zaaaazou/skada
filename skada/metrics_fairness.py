@@ -93,17 +93,14 @@ class DemographicParityDifferenceScorer(_BaseDomainAwareScorer):
     """
 
     def __init__(
-        self,
-        weight_estimator=None,
-        scoring=None,
-        greater_is_better=False,
+        self, weight_estimator=None, scoring=None, greater_is_better=False, **params
     ):
         super().__init__()
         self.weight_estimator = weight_estimator
         self.scoring = scoring
         self._sign = 1 if greater_is_better else -1
 
-    def _score(self, estimator, X, s):
+    def _score(self, estimator, X, s, sample_domain=None, **params):
         proba_group_1 = estimator.predict_proba(X[s == 1])[0]
         proba_group_0 = estimator.predict_proba(X[s == 0])[0]
 
@@ -139,17 +136,14 @@ class DemographicParityRatioScorer(_BaseDomainAwareScorer):
     """
 
     def __init__(
-        self,
-        weight_estimator=None,
-        scoring=None,
-        greater_is_better=False,
+        self, weight_estimator=None, scoring=None, greater_is_better=False, **params
     ):
         super().__init__()
         self.weight_estimator = weight_estimator
         self.scoring = scoring
         self._sign = 1 if greater_is_better else -1
 
-    def _score(self, estimator, X, s):
+    def _score(self, estimator, X, s, sample_domain=None, **params):
         proba_group_1 = estimator.predict_proba(X[s == 1])[0]
         proba_group_0 = estimator.predict_proba(X[s == 0])[0]
 
@@ -176,13 +170,15 @@ class TPParityDifferenceScorer(_BaseDomainAwareScorer):
         scorer object will sign-flip the outcome of the `scorer`.
     """
 
-    def __init__(self, weight_estimator=None, scoring=None, greater_is_better=False):
+    def __init__(
+        self, weight_estimator=None, scoring=None, greater_is_better=False, **params
+    ):
         super().__init__()
         self.weight_estimator = weight_estimator
         self.scoring = scoring
         self._sign = 1 if greater_is_better else -1
 
-    def _score(self, estimator, X, y, s):
+    def _score(self, estimator, X, y, s, sample_domain=None, **params):
         positives_group_1 = X[s == 1, y == 1]
         positives_group_0 = X[s == 0, y == 1]
 
@@ -213,13 +209,15 @@ class TPParityRatioScorer(_BaseDomainAwareScorer):
         scorer object will sign-flip the outcome of the `scorer`.
     """
 
-    def __init__(self, weight_estimator=None, scoring=None, greater_is_better=False):
+    def __init__(
+        self, weight_estimator=None, scoring=None, greater_is_better=False, **params
+    ):
         super().__init__()
         self.weight_estimator = weight_estimator
         self.scoring = scoring
         self._sign = 1 if greater_is_better else -1
 
-    def _score(self, estimator, X, y, s):
+    def _score(self, estimator, X, y, s, sample_domain=None, **params):
         positives_group_1 = X[s == 1, y == 1]
         positives_group_0 = X[s == 0, y == 1]
 
@@ -259,13 +257,15 @@ class FNParityDifferenceScorer(_BaseDomainAwareScorer):
         while higher values indicate greater disparity between the groups.
     """
 
-    def __init__(self, weight_estimator=None, scoring=None, greater_is_better=False):
+    def __init__(
+        self, weight_estimator=None, scoring=None, greater_is_better=False, **params
+    ):
         super().__init__()
         self._sign = 1 if greater_is_better else -1
         self.scoring = scoring
         self.weight_estimator = weight_estimator
 
-    def _score(self, estimator, X, y, s):
+    def _score(self, estimator, X, y, s, sample_domain=None, **params):
         positive_group_1 = X[s == 1, y == 1]
         positive_group_0 = X[s == 0, y == 1]
 
@@ -303,13 +303,15 @@ class FNParityRatioScorer(_BaseDomainAwareScorer):
         A score of 1 indicates perfect false negative parity, while higher or
     """
 
-    def __init__(self, weight_estimator=None, scoring=None, greater_is_better=False):
+    def __init__(
+        self, weight_estimator=None, scoring=None, greater_is_better=False, **params
+    ):
         super().__init__()
         self.weight_estimator = weight_estimator
         self.scoring = scoring
         self._sign = 1 if greater_is_better else -1
 
-    def _score(self, estimator, X, y, s):
+    def _score(self, estimator, X, y, s, sample_domain=None, **params):
         positive_group_1 = X[s == 1, y == 1]
         positive_group_0 = X[s == 0, y == 1]
 
