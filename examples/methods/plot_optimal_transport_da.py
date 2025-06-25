@@ -16,7 +16,9 @@ This example illustrates the OTDA method from [1] on a simple classification tas
 # sphinx_gallery_thumbnail_number = 4
 
 # %%
+import matplotlib.animation as animation
 import matplotlib.pyplot as plt
+import numpy as np
 from sklearn.inspection import DecisionBoundaryDisplay
 from sklearn.svm import SVC
 
@@ -395,3 +397,77 @@ DecisionBoundaryDisplay.from_estimator(
 plt.scatter(X_target[:, 0], X_target[:, 1], c=y_target, vmax=9, cmap="tab10", alpha=0.7)
 plt.axis(lims)
 plt.title(label=f"OTDA linear (ACC={ACC_linear:.2f})")
+
+
+# %%
+# Partial mapping
+# ----------------
+
+plt.figure(4, (8, 8))
+
+alphas = np.linspace(0, 1, 20)
+y_temp = y.copy()
+y_temp[y < 0] = -1
+
+
+def _update_plot(i):
+    plt.clf()
+    alpha = alphas[i]
+    clf_otda_linear = make_da_pipeline(
+        LinearOTMappingAdapter(alpha=alpha), SVC(kernel="rbf", C=1)
+    )
+    clf_otda_linear.fit(X, y, sample_domain=sample_domain)
+    X_final = clf_otda_linear[0].transform(X, sample_domain=1, allow_source=True)
+    # Build OTDA pipeline for regression
+
+    plt.scatter(
+        X_final[:, 0],
+        X_final[:, 1],
+        label="(1-alpha)*target+alpha*OT(target)",
+        alpha=0.5,
+    )
+    plt.scatter(X_source[:, 0], X_source[:, 1], label="source", alpha=0.5)
+    plt.scatter(X_target[:, 0], X_target[:, 1], label="target", alpha=0.5)
+    plt.legend()
+    DecisionBoundaryDisplay.from_estimator(
+        clf_otda_linear,
+        X_source,
+        alpha=0.3,
+        eps=0.5,
+        response_method="predict",
+        vmax=9,
+        cmap="tab10",
+        ax=plt.gca(),
+    )
+    return 1
+
+
+alpha = alphas[0]
+clf_otda_linear = make_da_pipeline(
+    LinearOTMappingAdapter(alpha=alpha), SVC(kernel="rbf", C=1)
+)
+clf_otda_linear.fit(X, y, sample_domain=sample_domain)
+X_final = clf_otda_linear[0].transform(
+    X, sample_domain=sample_domain, allow_source=True
+)
+DecisionBoundaryDisplay.from_estimator(
+    clf_otda_linear,
+    X_source,
+    alpha=0.3,
+    eps=0.5,
+    response_method="predict",
+    vmax=9,
+    cmap="tab10",
+    ax=plt.gca(),
+)
+plt.scatter(
+    X_final[:, 0], X_final[:, 1], label="(1-alpha)*target+alpha*OT(target)", alpha=0.5
+)
+plt.scatter(X_source[:, 0], X_source[:, 1], label="source", alpha=0.5)
+plt.scatter(X_target[:, 0], X_target[:, 1], label="target", alpha=0.5)
+
+
+ani = animation.FuncAnimation(
+    plt.gcf(), _update_plot, len(alphas), interval=200, repeat_delay=2000
+)
+ani.save("otda_animation.gif")
